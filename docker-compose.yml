@@ -25,6 +25,7 @@ services:
       - 9600:9600 # required for Performance Analyzer
     networks:
       - odfe-net
+
   odfe-node2:
     image: amazon/opendistro-for-elasticsearch:1.9.0
     container_name: odfe-node2
@@ -46,6 +47,7 @@ services:
       - odfe-data2:/usr/share/elasticsearch/data
     networks:
       - odfe-net
+
   kibana:
     image: amazon/opendistro-for-elasticsearch-kibana:1.9.0
     container_name: odfe-kibana
@@ -63,8 +65,6 @@ services:
     image: httpd
     ports:
       - "80:80"
-    links:
-      - fluentd
     logging:
       driver: "fluentd"
       options:
@@ -75,12 +75,16 @@ services:
     build: ./fluentd
     volumes:
       - ./fluentd/conf:/fluentd/etc
-    links:
-      - "odfe-node1"
-      - "odfe-node2"
+    networks:
+        - odfe-net
     ports:
       - "24224:24224"
       - "24224:24224/udp"
+      
+  cerebro:
+    image: lmenezes/cerebro
+    ports:
+      - "9000:9000"
 
 volumes:
   odfe-data1:
@@ -88,3 +92,4 @@ volumes:
 
 networks:
   odfe-net:
+
