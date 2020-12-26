@@ -9,9 +9,9 @@ import javax.inject.Singleton;
 @Singleton
 public class KubernetesClientProducer {
 
-    @Produces
-    public KubernetesClient kubernetesClient() {
+//    @Produces
+//    public KubernetesClient kubernetesClient() {
         // here you would create a custom client
-        return new DefaultKubernetesClient();
-    }
+//        return new DefaultKubernetesClient();
+//    }
 }

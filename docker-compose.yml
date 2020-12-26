@@ -85,6 +85,8 @@ services:
     image: lmenezes/cerebro
     ports:
       - "9000:9000"
+    networks:
+      - odfe-net
 
 volumes:
   odfe-data1:
