@@ -46,18 +46,21 @@ public class ClientProvider {
                 .createNew()
                 .withApiVersion("apiextensions.k8s.io/v1beta1")
                 .withKind("CustomResourceDefinition")
+                // meta
                 .withNewMetadata()
-                .withName("logging-operator.bytefusion.de")
+                .withName("logging-operators.bytefusion.de")
                 .endMetadata()
+                // spec
                 .withNewSpec()
                 .withGroup("bytefusion.de")
-
-
+                // names
                 .withNewNames()
                 .withNewPlural("logging-operators")
                 .withNewSingular("logging-operator")
                 .withKind("Logging-Operator")
+                .withListKind("logging-operator-list")
                 .endNames()
+                .withScope("Namespaced")
                 .endSpec()
                 .done();
 
