@@ -1,10 +1,13 @@
 package de.bytefusion.k8s.customresource;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 
-@JsonDeserialize
+@JsonDeserialize(
+        using = JsonDeserializer.None.class
+)
 @RegisterForReflection
 public class LoggingOperatorSpec {
 
@@ -18,7 +21,5 @@ public class LoggingOperatorSpec {
     public void setCount(int count) {
         this.count = count;
     }
-
-
 
 }

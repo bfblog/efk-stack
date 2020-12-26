@@ -3,13 +3,14 @@ package de.bytefusion.k8s;
 import de.bytefusion.k8s.customresource.LoggingOperator;
 import de.bytefusion.k8s.customresource.LoggingOperatorDoneable;
 import de.bytefusion.k8s.customresource.LoggingOperatorList;
-import io.fabric8.kubernetes.api.model.apiextensions.v1beta1.CustomResourceDefinition;
-import io.fabric8.kubernetes.api.model.apiextensions.v1beta1.DoneableCustomResourceDefinition;
+import io.fabric8.kubernetes.api.model.apiextensions.v1.CustomResourceDefinition;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.ApiextensionsAPIGroupDSL;
+import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
+import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
 import io.fabric8.kubernetes.internal.KubernetesDeserializer;
 
 import javax.enterprise.inject.Produces;
@@ -42,42 +43,20 @@ public class ClientProvider {
 
         KubernetesDeserializer.registerCustomKind("instana.com/v1alpha1", "Example", LoggingOperator.class);
 
-        CustomResourceDefinition crd1 = defaultClient.customResourceDefinitions()
-                .createNew()
-                .withApiVersion("apiextensions.k8s.io/v1beta1")
-                .withKind("CustomResourceDefinition")
-                // meta
-                .withNewMetadata()
-                .withName("logging-operators.bytefusion.de")
-                .endMetadata()
-                // spec
-                .withNewSpec()
-                .withGroup("bytefusion.de")
-                // names
-                .withNewNames()
-                .withNewPlural("logging-operators")
-                .withNewSingular("logging-operator")
-                .withKind("Logging-Operator")
-                .withListKind("logging-operator-list")
-                .endNames()
-                .withScope("Namespaced")
-                .endSpec()
-                .done();
-
-        defaultClient.customResourceDefinitions().create(crd1);
-
         CustomResourceDefinition crd = defaultClient
+                .apiextensions()
+                .v1()
                 .customResourceDefinitions()
-                .list()
-                .getItems()
-                .stream()
-                .filter(d -> "examples.instana.com".equals(d.getMetadata().getName()))
-                .findAny()
-                .orElseThrow(
-                        () -> new RuntimeException("Deployment error: Custom resource definition examples.instana.com not found."));
+                .load(ClientProvider.class.getResourceAsStream("/logging-operator-crd.yaml"))
+                .get();
+
+        CustomResourceDefinitionContext crdContext = CustomResourceDefinitionContext.fromCrd(crd);
+
+        MixedOperation<LoggingOperator, LoggingOperatorList, LoggingOperatorDoneable, Resource<LoggingOperator, LoggingOperatorDoneable>> cronTabClient = defaultClient
+                .customResources(crd, LoggingOperator.class, LoggingOperatorList.class, LoggingOperatorDoneable.class);
 
         return defaultClient
-                .customResources(crd, LoggingOperator.class, LoggingOperatorList.class, LoggingOperatorDoneable.class)
+                .customResources(crdContext, LoggingOperator.class, LoggingOperatorList.class, LoggingOperatorDoneable.class)
                 .inNamespace(namespace);
     }
 }
