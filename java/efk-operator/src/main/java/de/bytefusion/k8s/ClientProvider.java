@@ -1,5 +1,6 @@
 package de.bytefusion.k8s;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import de.bytefusion.k8s.customresource.LoggingOperator;
 import de.bytefusion.k8s.customresource.LoggingOperatorDoneable;
 import de.bytefusion.k8s.customresource.LoggingOperatorList;
@@ -11,7 +12,9 @@ import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
+import io.fabric8.kubernetes.client.internal.SerializationUtils;
 import io.fabric8.kubernetes.internal.KubernetesDeserializer;
+import org.yaml.snakeyaml.Yaml;
 
 import javax.enterprise.inject.Produces;
 import javax.inject.Named;
@@ -50,10 +53,25 @@ public class ClientProvider {
                 .load(ClientProvider.class.getResourceAsStream("/logging-operator-crd.yaml"))
                 .get();
 
-        CustomResourceDefinitionContext crdContext = CustomResourceDefinitionContext.fromCrd(crd);
+        CustomResourceDefinitionContext crdContext = new CustomResourceDefinitionContext.Builder()
+                .withVersion("apiextensions.k8s.io/v1")
+                .withKind("CustomResourceDefinition")
+                .withGroup(crd.getSpec().getGroup())
+                .withVersion(crd.getSpec().getVersions().get(0).getName())
+                .withScope(crd.getSpec().getScope())
+                .withName(crd.getMetadata().getName())
+                .withPlural(crd.getSpec().getNames().getPlural())
+                .withKind(crd.getSpec().getNames().getKind())
+                .build();
+
+        try {
+            System.out.println( SerializationUtils.dumpAsYaml(crd) );
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
 
         MixedOperation<LoggingOperator, LoggingOperatorList, LoggingOperatorDoneable, Resource<LoggingOperator, LoggingOperatorDoneable>> cronTabClient = defaultClient
-                .customResources(crd, LoggingOperator.class, LoggingOperatorList.class, LoggingOperatorDoneable.class);
+                .customResources(crdContext, LoggingOperator.class, LoggingOperatorList.class, LoggingOperatorDoneable.class);
 
         return defaultClient
                 .customResources(crdContext, LoggingOperator.class, LoggingOperatorList.class, LoggingOperatorDoneable.class)
