@@ -1,0 +1,6 @@
+apiVersion: "logging-stacks.bytefusion.de/v1"
+kind: LoggingStack
+metadata:
+  name: logging-stacks.bytefusion.de
+spec:
+  count: 1

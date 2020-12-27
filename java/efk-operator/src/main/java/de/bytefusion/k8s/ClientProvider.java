@@ -1,27 +1,28 @@
 package de.bytefusion.k8s;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import com.github.reinert.jjschema.v1.JsonSchemaV4Factory;
 import de.bytefusion.k8s.customresource.LoggingOperator;
 import de.bytefusion.k8s.customresource.LoggingOperatorDoneable;
 import de.bytefusion.k8s.customresource.LoggingOperatorList;
+import de.bytefusion.k8s.customresource.LoggingOperatorSpec;
 import io.fabric8.kubernetes.api.model.apiextensions.v1.CustomResourceDefinition;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.kubernetes.client.dsl.ApiextensionsAPIGroupDSL;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
 import io.fabric8.kubernetes.client.internal.SerializationUtils;
+import io.fabric8.kubernetes.client.utils.Serialization;
 import io.fabric8.kubernetes.internal.KubernetesDeserializer;
-import org.yaml.snakeyaml.Yaml;
 
 import javax.enterprise.inject.Produces;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 @Singleton
 public class ClientProvider {
@@ -44,7 +45,7 @@ public class ClientProvider {
     @Singleton
     NonNamespaceOperation<LoggingOperator, LoggingOperatorList, LoggingOperatorDoneable, Resource<LoggingOperator, LoggingOperatorDoneable>> makeCustomResourceClient(KubernetesClient defaultClient, @Named("namespace") String namespace) {
 
-        KubernetesDeserializer.registerCustomKind("instana.com/v1alpha1", "Example", LoggingOperator.class);
+        KubernetesDeserializer.registerCustomKind("bytefusion.de/v1", "logging-stack", LoggingOperator.class);
 
         CustomResourceDefinition crd = defaultClient
                 .apiextensions()
@@ -65,6 +66,15 @@ public class ClientProvider {
                 .build();
 
         try {
+            JsonSchemaV4Factory schemaFactory = new JsonSchemaV4Factory();
+            //schemaFactory.setAutoPutDollarSchema(true);
+            JsonNode productSchema = schemaFactory.createSchema(LoggingOperatorSpec.class);
+            System.out.println("--- start ---");
+            System.out.println(productSchema);
+            System.out.println("--- end ---");
+            System.out.println( new YAMLMapper().writeValueAsString(productSchema) );
+
+            System.out.println( Serialization.asJson( new LoggingOperator() ) );
             System.out.println( SerializationUtils.dumpAsYaml(crd) );
         } catch (JsonProcessingException e) {
             e.printStackTrace();

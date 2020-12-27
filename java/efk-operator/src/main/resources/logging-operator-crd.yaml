@@ -9,28 +9,27 @@ spec:
     listKind: LoggingStackList
     plural: logging-stacks
     singular: logging-stack
+  scope: Namespaced
   versions:
     - name: v1
       served: true
-      storage: false
+      storage: true
       schema:
         openAPIV3Schema:
           type: object
           properties:
             count:
               type: integer
-    - name: v1beta
+    - name: v1beta1
       # Each version can be enabled/disabled by Served flag.
       served: true
       # One and only one version must be marked as the storage version.
-      storage: true
+      storage: false
       # A schema is required
       schema:
         openAPIV3Schema:
           type: object
           properties:
-            host:
-              type: string
-            port:
-              type: string
-  scope: Namespaced
+            count:
+              type: integer
+
