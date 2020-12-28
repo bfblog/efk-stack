@@ -1,4 +1,4 @@
-apiVersion: "logging-stacks.bytefusion.de/v1"
+apiVersion: "bytefusion.de/v1"
 kind: LoggingStack
 metadata:
   name: logging-stacks.bytefusion.de
