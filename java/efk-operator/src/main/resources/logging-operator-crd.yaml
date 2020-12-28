@@ -9,7 +9,10 @@ spec:
     listKind: LoggingStackList
     plural: logging-stacks
     singular: logging-stack
+    shortNames:
+      - bfls
   scope: Namespaced
+  preserveUnknownFields: false
   versions:
     - name: v1
       served: true
@@ -18,8 +21,11 @@ spec:
         openAPIV3Schema:
           type: object
           properties:
-            count:
-              type: integer
+            spec:
+              type: object
+              properties:
+                count:
+                  type: integer
     - name: v1beta1
       # Each version can be enabled/disabled by Served flag.
       served: true
@@ -30,6 +36,9 @@ spec:
         openAPIV3Schema:
           type: object
           properties:
-            count:
-              type: integer
+            spec:
+              type: object
+              properties:
+                count:
+                  type: integer
 
