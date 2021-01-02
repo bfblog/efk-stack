@@ -1,24 +1,20 @@
 package de.bytefusion.k8s;
 
-import de.bytefusion.k8s.customresource.LoggingOperator;
-import de.bytefusion.k8s.customresource.LoggingOperatorDoneable;
-import de.bytefusion.k8s.customresource.LoggingOperatorList;
-import io.fabric8.kubernetes.api.model.Pod;
+import de.bytefusion.k8s.customresource.*;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import io.quarkus.runtime.ShutdownEvent;
 import io.quarkus.runtime.StartupEvent;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
-import java.util.Arrays;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
+@ApplicationScoped
 public class LoggingOperatorMain {
 
     private Logger log = Logger.getLogger( LoggingOperatorMain.class.getName() );
@@ -28,6 +24,9 @@ public class LoggingOperatorMain {
 
     @Inject
     private NonNamespaceOperation<LoggingOperator, LoggingOperatorList, LoggingOperatorDoneable, Resource<LoggingOperator, LoggingOperatorDoneable>> loggingOperatorClient;
+
+    @Inject
+    private LoggingOperatorCache cache;
 
     void onStartup(@Observes StartupEvent _ev) {
         log.info("starting");
@@ -40,23 +39,16 @@ public class LoggingOperatorMain {
 
     private void runWatch() {
         try {
-            List<String> allNodes = IntStream.range(1, 10).mapToObj(xx -> "odfe-node" + String.valueOf(xx)).collect(Collectors.toList());
             log.info("> runWatch()");
-            List<Pod> existingPods = client.pods()
-                    .list()
-                    .getItems()
-                    .stream()
-                    .filter( pod -> pod.getMetadata() != null)
-                    .filter( pod -> pod.getMetadata().getLabels() != null )
-                    .filter(pod -> allNodes.contains(pod.getMetadata().getLabels().get("name")))
-                    .collect(Collectors.toList());
-            Pod pod = client.pods().load(getClass().getResourceAsStream("/elasticsearch-pod.yaml")).get();
-            pod.getSpec();
-            client.pods().create(pod);
+            cache.listThenWatch(this::onEvent);
         } catch( Exception e ) {
             log.log(Level.SEVERE, e.getMessage(),e  );
         } finally {
             log.info("< runWatch()");
         }
+    }
+
+    public void onEvent(Watcher.Action action, String uid ) {
+        log.info("action: " + action + " uid: " +uid );
     }
 }

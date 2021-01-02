@@ -5,6 +5,9 @@ import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -17,6 +20,8 @@ import java.util.function.BiConsumer;
 @ApplicationScoped
 public class LoggingOperatorCache {
 
+    private final Logger log = Logger.getLogger(LoggingOperatorCache.class.getName());
+
     private final Map<String, LoggingOperator> cache = new ConcurrentHashMap<>();
 
     @Inject
@@ -28,12 +33,24 @@ public class LoggingOperatorCache {
         return cache.get(uid);
     }
 
+    private Watcher<LoggingOperator> watcher = new Watcher<LoggingOperator>() {
+        @Override
+        public void eventReceived(Action action, LoggingOperator resource) {
+            // delegate
+            onEvent(action, resource);
+        }
+
+        @Override
+        public void onClose(KubernetesClientException cause) {
+            log.log(Level.INFO, "onClose", cause);
+            System.exit(-1);
+        }
+    };
+
     public void listThenWatch(BiConsumer<Watcher.Action, String> callback) {
 
         try {
-
             // list
-
             crClient
                     .list()
                     .getItems()
@@ -45,10 +62,10 @@ public class LoggingOperatorCache {
                     );
 
             // watch
-
             crClient.watch(new Watcher<LoggingOperator>() {
                 @Override
                 public void eventReceived(Action action, LoggingOperator resource) {
+                    log.info("action: " + action + " uid: " + resource.getMetadata().getUid() );
                     try {
                         String uid = resource.getMetadata().getUid();
                         if (cache.containsKey(uid)) {
@@ -58,13 +75,13 @@ public class LoggingOperatorCache {
                                 return;
                             }
                         }
-                        System.out.println("received " + action + " for resource " + resource);
-                        if (action == Action.ADDED || action == Action.MODIFIED) {
+                        log.log(Level.INFO, "received " + action + " for resource " + resource);
+                        if (action == Watcher.Action.ADDED || action == Watcher.Action.MODIFIED) {
                             cache.put(uid, resource);
-                        } else if (action == Action.DELETED) {
+                        } else if (action == Watcher.Action.DELETED) {
                             cache.remove(uid);
                         } else {
-                            System.err.println("Received unexpected " + action + " event for " + resource);
+                            log.log(Level.SEVERE, "Received unexpected " + action + " event for " + resource);
                             System.exit(-1);
                         }
                         executor.execute(() -> callback.accept(action, uid));
@@ -76,12 +93,14 @@ public class LoggingOperatorCache {
 
                 @Override
                 public void onClose(KubernetesClientException cause) {
-                    cause.printStackTrace();
+                    log.log(Level.INFO, "onClose", cause);
                     System.exit(-1);
                 }
+
             });
+
         } catch (Exception e) {
-            e.printStackTrace();
+            log.log(Level.SEVERE, e.getMessage(), e);
             System.exit(-1);
         }
     }
