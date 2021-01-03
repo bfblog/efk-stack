@@ -1,5 +1,7 @@
 package de.bytefusion.k8s.customresource;
 
+import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
@@ -24,28 +26,19 @@ public class LoggingOperatorCache {
 
     private final Map<String, LoggingOperator> cache = new ConcurrentHashMap<>();
 
+    private final Map<String, Pod> podCache = new ConcurrentHashMap<>();
+
     @Inject
     private NonNamespaceOperation<LoggingOperator, LoggingOperatorList,LoggingOperatorDoneable, Resource<LoggingOperator, LoggingOperatorDoneable>> crClient;
+
+    @Inject
+    KubernetesClient client;
 
     private Executor executor = Executors.newSingleThreadExecutor();
 
     public LoggingOperator get(String uid) {
         return cache.get(uid);
     }
-
-    private Watcher<LoggingOperator> watcher = new Watcher<LoggingOperator>() {
-        @Override
-        public void eventReceived(Action action, LoggingOperator resource) {
-            // delegate
-            onEvent(action, resource);
-        }
-
-        @Override
-        public void onClose(KubernetesClientException cause) {
-            log.log(Level.INFO, "onClose", cause);
-            System.exit(-1);
-        }
-    };
 
     public void listThenWatch(BiConsumer<Watcher.Action, String> callback) {
 
@@ -105,4 +98,20 @@ public class LoggingOperatorCache {
         }
     }
 
+    public void listThenWatchPods(BiConsumer<Watcher.Action, String> callback) {
+        try {
+            client.pods()
+                    .list()
+                    .getItems()
+                    .stream()
+                    .forEach( resource -> {
+                        String uid = resource.getMetadata().getUid();
+                        podCache.put( uid, resource );
+                        executor.execute(() -> callback.accept(Watcher.Action.ADDED, uid));
+                    } );
+
+        } catch( Exception e ) {
+            log.log(Level.SEVERE, e.getMessage(), e);
+        }
+    }
 }

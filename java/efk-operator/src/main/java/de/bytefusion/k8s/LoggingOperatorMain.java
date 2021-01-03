@@ -28,6 +28,9 @@ public class LoggingOperatorMain {
     @Inject
     private LoggingOperatorCache cache;
 
+    @Inject
+    private ElasticsearchController esController;
+
     void onStartup(@Observes StartupEvent _ev) {
         log.info("starting");
         new Thread(this::runWatch).start();
@@ -49,6 +52,8 @@ public class LoggingOperatorMain {
     }
 
     public void onEvent(Watcher.Action action, String uid ) {
-        log.info("action: " + action + " uid: " +uid );
+        log.info("onEvent() action: " + action + " uid: " +uid );
+        LoggingOperator entry = cache.get(uid);
+        esController.reconcile(entry);
     }
 }
