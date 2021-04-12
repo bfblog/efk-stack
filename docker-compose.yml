@@ -2,7 +2,7 @@ version: '3'
 services:
   odfe-node1:
     hostname: odfe-node1
-    image: amazon/opendistro-for-elasticsearch:1.9.0
+    image: amazon/opendistro-for-elasticsearch:1.13.1
     container_name: odfe-node1
     environment:
       - cluster.name=odfe-cluster
@@ -16,18 +16,27 @@ services:
         soft: -1
         hard: -1
       nofile:
-        soft: 65536 # maximum number of open files for the Elasticsearch user, set to at least 65536 on modern systems
-        hard: 65536
+        soft: 262144 # maximum number of open files for the Elasticsearch user, set to at least 65536 on modern systems
+        hard: 262144
     volumes:
       - odfe-data1:/usr/share/elasticsearch/data
+      - ./elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - ./certs/esnode1.pem:/usr/share/elasticsearch/config/esnode.pem
+      - ./certs/esnode-key.pem:/usr/share/elasticsearch/config/esnode-key.pem
+      - ./certs/admin.pem:/usr/share/elasticsearch/config/admin.pem
+      - ./certs/esnode-key.pem:/usr/share/elasticsearch/config/admin-key.pem
+      - ./certs/root-ca.pem:/usr/share/elasticsearch/config/root-ca.pem
     ports:
       - 9200:9200
       - 9600:9600 # required for Performance Analyzer
+#    command: cd /usr/share/elasticsearch && chmod +x securityadmin.sh && ./securityadmin.sh
+#   command: sleep infinity
+    
     networks:
       - odfe-net
 
   odfe-node2:
-    image: amazon/opendistro-for-elasticsearch:1.9.0
+    image: amazon/opendistro-for-elasticsearch:1.13.1
     container_name: odfe-node2
     environment:
       - cluster.name=odfe-cluster
@@ -41,15 +50,21 @@ services:
         soft: -1
         hard: -1
       nofile:
-        soft: 65536
-        hard: 65536
+        soft: 262144
+        hard: 262144
     volumes:
       - odfe-data2:/usr/share/elasticsearch/data
+      - ./elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - ./certs/esnode2.pem:/usr/share/elasticsearch/config/esnode.pem
+      - ./certs/esnode-key.pem:/usr/share/elasticsearch/config/esnode-key.pem
+      - ./certs/admin.pem:/usr/share/elasticsearch/config/admin.pem
+      - ./certs/admin-key.pem:/usr/share/elasticsearch/config/admin-key.pem
+      - ./certs/root-ca.pem:/usr/share/elasticsearch/config/root-ca.pem
     networks:
       - odfe-net
 
   kibana:
-    image: amazon/opendistro-for-elasticsearch-kibana:1.9.0
+    image: amazon/opendistro-for-elasticsearch-kibana:1.13.1
     container_name: odfe-kibana
     ports:
       - 5601:5601
@@ -58,19 +73,15 @@ services:
     environment:
       ELASTICSEARCH_URL: https://odfe-node1:9200
       ELASTICSEARCH_HOSTS: https://odfe-node1:9200
+      SERVER_SSL_ENABLED: "true"
+      SERVER_SSL_KEY: /usr/share/kibana/config/esnode-key.pem
+      SERVER_SSL_CERTIFICATE: /usr/share/kibana/config/esnode.pem
+    volumes:
+      - ./certs/esnode.pem:/usr/share/kibana/config/esnode.pem
+      - ./certs/esnode-key.pem:/usr/share/kibana/config/esnode-key.pem
     networks:
       - odfe-net
   
-  web:
-    image: httpd
-    ports:
-      - "80:80"
-    logging:
-      driver: "fluentd"
-      options:
-        fluentd-address: localhost:24224
-        tag: httpd.access
-
   fluentd:
     build: ./fluentd
     volumes:
@@ -81,10 +92,18 @@ services:
       - "24224:24224"
       - "24224:24224/udp"
       
-  cerebro:
-    image: lmenezes/cerebro
+  elastichq:
+    image: elastichq/elasticsearch-hq
+    environment:
+      - "HQ_DEFAULT_URL=https://admin:admin@odfe-node1:9200"
+      - "HQ_DEBUG=True"
+      - "HQ_ENABLE_SSL=True"
+      - "HQ_CA_CERTS=/esnode.crt"
+      - "HQ_VERIFY_CERTS=False"
     ports:
-      - "9000:9000"
+      - "5000:5000"
+    volumes:
+      - ./esnode.crt:/esnode.crt
     networks:
       - odfe-net
 
