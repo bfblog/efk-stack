@@ -1,17 +1,18 @@
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: es-master
   labels:
-    component: elasticsearch
-    role: master
+    app: elasticsearch
 spec:
   replicas: 3
+  selector:
+     matchLabels:
+        app: elasticsearch
   template:
     metadata:
       labels:
-        component: elasticsearch
-        role: master
+        app: elasticsearch
     spec:
       initContainers:
       - name: init-sysctl
