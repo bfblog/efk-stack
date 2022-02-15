@@ -28,6 +28,9 @@ spec:
         path: /
         hosts:
           - elasticsearch.127.0.0.1.nip.io
+        tls:
+          hosts:
+            - elasticsearch.127.0.0.1.nip.io
   
     repoURL: https://opensearch-project.github.io/helm-charts/
     targetRevision: 1.7.4
