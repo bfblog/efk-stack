@@ -5,7 +5,6 @@ metadata:
   namespace: argocd
   labels:
     group: security
-    app-of-apps: bootstrap
     app: cert-manager
 spec:
   destination:
