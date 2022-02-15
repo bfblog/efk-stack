@@ -17,12 +17,11 @@ spec:
       - name: replicas
         value: "1"
       - name: ingress.enabled
-        value: true
+        value: "true"
       - name: ingress.host[0]
         value: elasticsearch.127.0.0.1.nip.io
       values: |
           ingress:
-            enabled: false
             annotations: 
               kubernetes.io/ingress.class: nginx
               nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
