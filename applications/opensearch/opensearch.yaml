@@ -20,7 +20,7 @@ spec:
         value: true
       - name: ingress.host[0]
         value: elasticsearch.127.0.0.1.nip.io
-      - name: values
+      - name: ingress
         value: |
           ingress:
             enabled: false
