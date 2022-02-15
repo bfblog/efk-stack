@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: elasticsearch
+  namespace: argocd
+spec:
+  destination:
+    namespace: elasticsearch
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: opensearch
+    helm:
+      parameters:
+      - name: replicas
+        value: "1"
+    repoURL: https://opensearch-project.github.io/helm-charts/
+    targetRevision: 1.7.4
+  syncPolicy:
+    syncOptions:
+    - CreateNamespace=true
