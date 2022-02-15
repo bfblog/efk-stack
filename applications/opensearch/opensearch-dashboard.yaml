@@ -29,14 +29,6 @@ spec:
             tls:
               - hosts:
                   - elasticsearch.127.0.0.1.nip.io
-  hosts:
-    - host: chart-example.local
-      paths:
-        - path: /
-          backend:
-            serviceName: chart-example.local
-            servicePort: 80
-
     repoURL: https://opensearch-project.github.io/helm-charts/
     targetRevision: 1.2.1
   syncPolicy:
