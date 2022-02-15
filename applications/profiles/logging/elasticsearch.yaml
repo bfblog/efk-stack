@@ -5,7 +5,7 @@ metadata:
   namespace: argocd
   labels:
     group: security
-    app: argocd
+    app: elasticsearch
 spec:
   destination:
     namespace: default
