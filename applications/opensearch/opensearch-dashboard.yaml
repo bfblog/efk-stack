@@ -1,13 +1,13 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: elasticsearch-dashboard
+  name: opensearch-dashboard
   namespace: argocd
   labels:
     app: opensearch-dashboard
 spec:
   destination:
-    namespace: elasticsearch
+    namespace: opensearch
     server: https://kubernetes.default.svc
   project: default
   source:
