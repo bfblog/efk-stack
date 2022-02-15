@@ -17,7 +17,7 @@ spec:
   source:
     repoURL: https://github.com/bfblog/efk-stack.git
     targetRevision: work
-    path: applications/profiles/bootstrap-minimal
+    path: applications/profiles/bootstrap
 
     # directory
     directory:
