@@ -1,11 +1,11 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: bootstrap-minimal
+  name: bootstrap
   # You'll usually want to add your resources to the argocd namespace.
   namespace: argocd
   labels:
-    profile: minimal
+    app: bootstrap
   # Add a this finalizer ONLY if you want these to cascade delete.
   finalizers:
     - resources-finalizer.argocd.argoproj.io
@@ -17,7 +17,7 @@ spec:
   source:
     repoURL: https://github.com/bfblog/efk-stack.git
     targetRevision: work
-    path: applications/profiles
+    path: applications/profiles/bootstrap-minimal
 
     # directory
     directory:
