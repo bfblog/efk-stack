@@ -3,6 +3,8 @@ kind: Application
 metadata:
   name: elasticsearch-dashboard
   namespace: argocd
+  labels:
+    app: opensearch-dashboard
 spec:
   destination:
     namespace: elasticsearch
