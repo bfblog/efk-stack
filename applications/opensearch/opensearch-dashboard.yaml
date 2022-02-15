@@ -16,19 +16,7 @@ spec:
       parameters:
       - name: ingress.enabled
         value: "true"
-      values: |
-        ingress:
-          annotations: 
-            kubernetes.io/ingress.class: nginx
-            nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-            nginx.ingress.kubernetes.io/ssl-redirect: "true"
-            nginx.ingress.kubernetes.io/ssl-passthrough: "true"
-          path: /
-          hosts:
-            - elasticsearch-dashboard.127.0.0.1.nip.io
-          tls:
-            - hosts:
-                - elasticsearch-dashboard.127.0.0.1.nip.io
+
     repoURL: https://opensearch-project.github.io/helm-charts/
     targetRevision: 1.2.1
   syncPolicy:
