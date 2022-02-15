@@ -24,7 +24,6 @@ spec:
         ingress:
           ingressClassName: nginx
           annotations:
-            kubernetes.io/tls-acme: "true"
           hosts:
             - host: chart-example.local
               paths:
