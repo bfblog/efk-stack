@@ -6,6 +6,7 @@ metadata:
   labels:
     group: security
     app-of-apps: bootstrap
+	app: cert-manager
 spec:
   destination:
     namespace: default

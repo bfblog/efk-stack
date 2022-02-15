@@ -6,6 +6,7 @@ metadata:
   labels:
     group: security
     app-of-apps: bootstrap
+	app: ingress-nginx
 spec:
   destination:
     namespace: default
