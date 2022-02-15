@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: elasticsearch-app
+  name: opensearch-app
   namespace: argocd
   labels:
     group: security
@@ -12,7 +12,7 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    path: applications/elasticsearch
+    path: applications/opensearch
     repoURL: https://github.com/bfblog/efk-stack.git
     targetRevision: work
   syncPolicy:
