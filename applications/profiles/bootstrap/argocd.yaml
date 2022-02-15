@@ -6,7 +6,7 @@ metadata:
   labels:
     group: security
     app-of-apps: bootstrap
-	app: argocd
+    app: argocd
 spec:
   destination:
     namespace: default
