@@ -27,8 +27,15 @@ spec:
       - name: ingress.host[0]
         value: elasticsearch.127.0.0.1.nip.io
       values: |
-        securityContext:
-          privileged: true
+        extraInitContainers: 
+          - name: init-sysctl
+            image: busybox:1.27.2
+            command:
+            - sysctl
+            - -w
+            - vm.max_map_count=262144
+            securityContext:
+              privileged: true
           ingress:
             annotations: 
               kubernetes.io/ingress.class: nginx
