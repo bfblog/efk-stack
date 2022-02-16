@@ -20,6 +20,8 @@ spec:
         value: "true"
       - name: sysctlInitContainer.enabled
         value: "true"
+      - name: podSecurityContext.runAsUser
+        value: 0
       - name: rbac.create
         value: "true"
       - name: ingress.enabled
