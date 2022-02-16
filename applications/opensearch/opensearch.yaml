@@ -16,6 +16,8 @@ spec:
       parameters:
       - name: replicas
         value: "1"
+      - name: sysctl.enabled
+        value: "true"
       - name: ingress.enabled
         value: "true"
       - name: ingress.host[0]
