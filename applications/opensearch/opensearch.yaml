@@ -16,8 +16,6 @@ spec:
       parameters:
       - name: replicas
         value: "1"
-      - name: sysctl.enabled
-        value: "true"
       - name: podSecurityPolicy.create
         value: "true"
       - name: rbac.create
