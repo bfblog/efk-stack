@@ -18,6 +18,8 @@ spec:
         value: "1"
       - name: sysctl.enabled
         value: "true"
+      - name: sysctlInitContainer.enabled
+        value: "true"
       - name: rbac.create
         value: "true"
       - name: ingress.enabled
