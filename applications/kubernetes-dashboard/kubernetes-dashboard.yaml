@@ -11,10 +11,12 @@ spec:
   source:
     chart: kubernetes-dashboard
     repoURL: https://bfblog.github.io/helm-charts
-    targetRevision: 1.0.0
+    targetRevision: 1.0.1
     helm:
       parameters:
       - name: ingress.enabled
         value: "true"
       - name: ingress.hosts[0]
         value: kubernetes-dashboard.127.0.0.1.nip.io
+      - name: security.enabled
+        value: "false"
