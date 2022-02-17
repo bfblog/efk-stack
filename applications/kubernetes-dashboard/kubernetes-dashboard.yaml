@@ -3,16 +3,18 @@ kind: Application
 metadata:
   name: kubernetes-dashboard
   namespace: argocd
-  labels:
-    group: security
 spec:
   destination:
-    namespace: default
+    namespace: kubernetes-dashboard
     server: https://kubernetes.default.svc
   project: default
   source:
-    path: third-party/kubernetes-dashboard/v2.4.0
-    repoURL: https://github.com/bfblog/efk-stack.git
-    targetRevision: work
-  syncPolicy:
-    automated: {}
+    chart: kubernetes-dashboard
+    repoURL: https://bfblog.github.io/helm-charts
+    targetRevision: 1.0.0
+    helm:
+      parameters:
+      - name: ingress.enabled
+        value: "true"
+      - name: ingress.hosts[0]
+        value: kubernetes-dashboard.127.0.0.1.nip.io
