@@ -1,0 +1,55 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: opensearch
+  namespace: argocd
+  labels:
+    app: opensearch
+spec:
+  destination:
+    namespace: opensearch
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: opensearch
+    helm:
+      parameters:
+      - name: replicas
+        value: "1"
+      - name: podSecurityPolicy.create
+        value: "true"
+      - name: rbac.create
+        value: "true"
+      - name: ingress.enabled
+        value: "true"
+      - name: ingress.host[0]
+        value: elasticsearch.127.0.0.1.nip.io
+      values: |
+        extraInitContainers: 
+          - name: init-sysctl
+            image: busybox:1.27.2
+            command:
+            - sysctl
+            - -w
+            - vm.max_map_count=262144
+            securityContext:
+              privileged: true
+              runAsUser: 0
+        ingress:
+          annotations: 
+            kubernetes.io/ingress.class: nginx
+            nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+            nginx.ingress.kubernetes.io/ssl-redirect: "true"
+            nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+          path: /
+          hosts:
+            - elasticsearch.127.0.0.1.nip.io
+          tls:
+            - hosts:
+                - elasticsearch.127.0.0.1.nip.io
+    repoURL: https://opensearch-project.github.io/helm-charts/
+    targetRevision: 1.7.4
+  syncPolicy:
+    automated: {}
+    syncOptions:
+    - CreateNamespace=true

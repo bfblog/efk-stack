@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argocd-app
+  namespace: argocd
+  labels:
+    group: security
+    app: argocd
+spec:
+  destination:
+    namespace: default
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: applications/argocd
+    repoURL: https://github.com/bfblog/efk-stack.git
+    targetRevision: work
+  syncPolicy:
+    automated: {}

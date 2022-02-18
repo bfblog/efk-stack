@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kubernetes-dashboard-app
+  namespace: argocd
+  labels:
+    group: security
+    app: kubernetes-dashboard
+spec:
+  destination:
+    namespace: default
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: applications/kubernetes-dashboard
+    repoURL: https://github.com/bfblog/efk-stack.git
+    targetRevision: work
+  syncPolicy:
+    automated: {}

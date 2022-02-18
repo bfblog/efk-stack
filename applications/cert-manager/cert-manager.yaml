@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cert-manager
+  namespace: argocd
+  labels:
+    group: security
+spec:
+  destination:
+    namespace: default
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: third-party/cert-manager/v1.7.1
+    repoURL: https://github.com/bfblog/efk-stack.git
+    targetRevision: work
+  syncPolicy:
+    automated: {}
